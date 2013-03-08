@@ -17,17 +17,19 @@ module MotionData
         def relationship(name, type, options={})
           options.each { |key, value| raise_if_relationship_option_not_allowed(type, key) }
 
-          raise_if_relationship_options_missing(options)
           raise_if_deletion_rule_not_allowed(options)
 
           attributes = {
-            name: name,
-            optional: core_data_boolean(true),
-            deletionRule: core_data_string(:no_action),
-            syncable: core_data_boolean(true)
+              name:          name,
+              optional:      core_data_boolean(true),
+              deletion_rule: core_data_string(:no_action),
+              syncable:      core_data_boolean(true),
+              class_name:    name.to_s.classify
           }
-          attributes.merge!({ minCount: 1, maxCount: 1 }) if type == :belongs_to
-          attributes.merge!(core_data_relationship_attributes(type, options))
+          attributes.merge!({minCount: 1, maxCount: 1}) if type == :belongs_to
+          attributes.merge!(options)
+          attributes = core_data_relationship_attributes(type, attributes)
+          p attributes
           relationships[self.entity_name] = {} if relationships[self.entity_name].nil?
           relationships[self.entity_name][name] = attributes
           attributes
@@ -66,21 +68,11 @@ module MotionData
           end
         end
 
-        def raise_if_relationship_options_missing(options)
-          unless relationship_options_complete?(options)
-            raise <<-ERROR
-! One of these options are required: 
-!   :class_name
-!   :inverse_of
-            ERROR
-          end
-        end
-
         def deletion_rule_allowed?(options)
           allowed_deletion_rules = [
-            :nullify,
-            :cascade,
-            :deny
+              :nullify,
+              :cascade,
+              :deny
           ]
           !options[:deletion_rule] || allowed_deletion_rules.include?(options[:deletion_rule])
         end
@@ -96,24 +88,19 @@ module MotionData
           end
         end
 
-        def relationship_options_complete?(options)
-          required_options = [:class_name, :inverse_of]
-          (required_options.uniq - options.keys.uniq).empty?
-        end
-
         def relationship_option_allowed?(type, option)
           allowed_options = {
-            has_many: [:ordered, :min, :max],
+              has_many: [:ordered, :min, :max],
           }[type] || []
 
           allowed_options += [
-            :required,
-            :spotlight,
-            :truth_file,
-            :transient,
-            :inverse_of,
-            :class_name,
-            :deletion_rule
+              :required,
+              :spotlight,
+              :truth_file,
+              :transient,
+              :inverse_of,
+              :class_name,
+              :deletion_rule
           ]
           allowed_options.include?(option)
         end
@@ -123,25 +110,27 @@ module MotionData
 
           options.each do |key, value|
             case key
-            when :required
-              attributes[:optional] = core_data_boolean(value != true)
-            when :inverse_of
-              attributes[:inverseName] = value
-            when :class_name
-              attributes[:inverseEntity] = value
-              attributes[:destinationEntity] = value
-            when :deletion_rule
-              attributes[:deletionRule] = core_data_string(value)
-            when :transient
-              attributes[:transient] = core_data_boolean(value)
-            when :spotlight
-              attributes[:spotlightIndexingEnabled] = core_data_boolean(value)
-            when :truth_file
-              attributes[:storedInTruthFile] = core_data_boolean(value)
-            when :min
-              attributes[:minCount] = value
-            when :max
-              attributes[:maxCount] = value
+              when :required
+                attributes[:optional] = core_data_boolean(value != true)
+              when :inverse_of
+                attributes[:inverseName] = value
+              when :class_name
+                attributes[:inverseEntity]     = value
+                attributes[:destinationEntity] = value
+              when :deletion_rule
+                attributes[:deletionRule] = core_data_string(value)
+              when :transient
+                attributes[:transient] = core_data_boolean(value)
+              when :spotlight
+                attributes[:spotlightIndexingEnabled] = core_data_boolean(value)
+              when :truth_file
+                attributes[:storedInTruthFile] = core_data_boolean(value)
+              when :min
+                attributes[:minCount] = value
+              when :max
+                attributes[:maxCount] = value
+              else
+                attributes[key] = value
             end
           end
           attributes[:toMany] = core_data_boolean(type == :has_many)

@@ -1,12 +1,15 @@
 require 'nokogiri'
 require 'fileutils'
 
+Bundler.require :default, :development
+
 require 'migrations/entity'
 require 'migrations/parser'
 require 'migrations/property'
 require 'migrations/relationship'
 require 'migrations/io'
 require 'migrations/generator'
+require 'active_support/inflector'
 
 namespace :db do
   desc 'Generate a version of the current database model as described in the models.'

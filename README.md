@@ -19,11 +19,12 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install activedata
+    $ gem install motion_data
 
 ## Usage
 
 TODO: Write usage instructions here
+
 
 ## Contributing
 

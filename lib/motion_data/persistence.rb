@@ -24,14 +24,14 @@ module MotionData
 
       def new(attributes={}, _context = nil)
         _context ||= context
-        alloc.initWithEntity(entity_description, insertIntoManagedObjectContext:_context).tap do |model|
+        instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext:_context).tap do |model|
           model.instance_variable_set('@new_record', true)
           attributes.each do |keyPath, value|
             model.setValue(value, forKey:keyPath)
           end
         end
-        yield self if block_given?
-        self
+        yield instance if block_given?
+        instance
       end
 
     end
