@@ -1,12 +1,17 @@
-# Activedata
+# MotionData
 
-TODO: Write a gem description
+Purpose of this gem is to provide a layer of abstraction on top of CoreData to be used with RubyMotion. It is inspired by ActiveRecord and tries to follow the ruby-way. 
+
+This gem is intended to be used with RubyMotion. It is heavily based (read: copy-paste) of the work done by fousa for
+[motion_migrate](https://github.com/fousa/motion_migrate) and [@mattgreen](https://github.com/mattgreen/) for [Nitron](https://github.com/mattgreen/nitron). Whoever I was unhappy with some decisions made in both of these projects, so I decided to spin off my own gem.
+
+Right now the gem is in early development phase and I am not releasing it on ruby gems. 
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'activedata'
+    gem 'motion_data', github: 'svyatogor/motion_data'
 
 And then execute:
 
