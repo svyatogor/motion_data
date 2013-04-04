@@ -22,13 +22,35 @@ module MotionData
         @context ||= UIApplication.sharedApplication.delegate.managedObjectContext
       end
 
-      def property(name, type, options={})
+      def property(name, options={})
       end
 
       def has_many(name, options={})
       end
 
+      def has_one(name, options={})
+      end
+
       def belongs_to(name, options={})
+      end
+
+      def serialize(*args)
+        options = args.last.is_a?(::Hash) ? args.pop : {}
+
+        if args.length > 1
+          args.each {|name| serialize name, options}
+        else
+          name = args.first
+
+          define_method name do
+            Marshal.load(self.send(:"#{name}_raw").nsstring)
+          end
+
+          define_method "#{name}=" do |v|
+            self.send(:"#{name}_raw=", Marshal.dump(v).nsdata)
+          end
+        end
+
       end
 
       def entity_description

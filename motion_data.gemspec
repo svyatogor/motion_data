@@ -20,4 +20,7 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency 'rake'
   gem.add_dependency 'nokogiri'
+  gem.add_dependency 'activesupport'
+  gem.add_dependency 'i18n'
+  gem.add_dependency 'sugarcube'
 end

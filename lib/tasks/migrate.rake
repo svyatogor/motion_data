@@ -3,16 +3,18 @@ require 'fileutils'
 
 Bundler.require :default, :development
 
+require 'migrations/schema'
 require 'migrations/entity'
-require 'migrations/parser'
 require 'migrations/property'
 require 'migrations/relationship'
 require 'migrations/io'
 require 'migrations/generator'
+require 'migrations/inflections'
 require 'active_support/inflector'
 
-namespace :db do
-  desc 'Generate a version of the current database model as described in the models.'
+
+namespace :schema do
+  desc 'Generate a version of the current database model as described in the scherma.rb.'
   task :migrate do
     schema_xml = MotionData::Migrations::Generator.build
     MotionData::Migrations::IO.write(schema_xml)
@@ -34,23 +36,22 @@ namespace :db do
     end
   end
 
-  namespace :schema do
-    desc 'Dump the current version of the database model scheme.'
-    task :dump do
-      if current_schema = MotionData::Migrations::IO.current_schema
-        puts File.open(File.join(current_schema, "contents")).read
-      else
-        puts "! No schema found in this project."
-      end
-    end
-
-    desc 'Show the current version of the database model scheme.'
-    task :version do
-      if version = MotionData::Migrations::IO.current_schema_version
-        puts "# Data model is currently at version #{version}."
-      else
-        puts "! No schema found in this project."
-      end
+  desc 'Dump the current version of the database model scheme.'
+  task :dump do
+    if current_schema = MotionData::Migrations::IO.current_schema
+      puts File.open(File.join(current_schema, "contents")).read
+    else
+      puts "! No schema found in this project."
     end
   end
+
+  desc 'Show the current version of the database model scheme.'
+  task :version do
+    if version = MotionData::Migrations::IO.current_schema_version
+      puts "# Data model is currently at version #{version}."
+    else
+      puts "! No schema found in this project."
+    end
+  end
+
 end
