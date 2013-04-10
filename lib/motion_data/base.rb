@@ -14,24 +14,12 @@ module MotionData
     end
 
     def context
-      @context ||= (managedObjectContext || self.class.context)
+      @context ||= self.class.context
     end
 
     class << self
       def context
         @context ||= UIApplication.sharedApplication.delegate.managedObjectContext
-      end
-
-      def property(name, options={})
-      end
-
-      def has_many(name, options={})
-      end
-
-      def has_one(name, options={})
-      end
-
-      def belongs_to(name, options={})
       end
 
       def serialize(*args)
