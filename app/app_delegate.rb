@@ -16,7 +16,7 @@ class AppDelegate
           NSMigratePersistentStoresAutomaticallyOption => true,
           NSInferMappingModelAutomaticallyOption       => true
       }
-      unless persistentStoreCoordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: options, error: error_ptr)
+      unless persistentStoreCoordinator.addPersistentStoreWithType(NSInMemoryStoreType, configuration: nil, URL: storeURL, options: options, error: error_ptr)
         raise "Can't add persistent SQLite store: #{error_ptr[0].description}"
       end
 
