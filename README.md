@@ -50,8 +50,39 @@ The sample db/schema.rb will look like this:
       end
     end
 
-After you are done editing the file run
-    rake schema:migrate
+After you are done editing the file run `rake schema:migrate`.
+
+The dsl is based around ActiveRecord syntax but given fundamental differences between AR and CoreData quite a few things work differently.
+
+The following types of relationships are supported:
+
+* belongs_to
+    Valid options:
+
+    * :required
+    * :deletion_rule
+    * :class_name
+    * :inverse_of
+    * :spotlight
+    * :truth_file
+    * :transient
+
+* has_many
+    Valid options:
+    
+    * :required
+    * :min
+    * :max
+    * :deletion_rule
+    * :class_name
+    * :inverse_of
+    * :ordered
+    * :spotlight
+    * :truth_file
+    * :transient
+
+`has_one` association is supported but is just an alias to belongs_to as the two work identically in CoreData.
+
 
 
 ## Contributing
