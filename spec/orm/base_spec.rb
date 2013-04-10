@@ -44,25 +44,25 @@ describe "MotionData::Base" do
   	end
 
   	describe "setter" do
-  		it "store marshaled data in <field>_raw" do
+  		it "store marshaled data in primitive" do
   			v = [1,2]
   			d = Marshal.dump(v).nsdata
   			ParentModel.class_eval { serialize :x }
   			model = ParentModel.new
 
   			model.x = v
-  			model.x_raw.should == d
+  			model.primitiveX.should == d
   		end
   	end
 
   	describe "getter" do
-  		it "deserializes marshaled data from <field>_raw" do
+  		it "deserializes marshaled data from primitive" do
   			v = [1,2]
   			d = Marshal.dump(v).nsdata
   			ParentModel.class_eval { serialize :x }
   			model = ParentModel.new
 
-  			model.x_raw = d
+  			model.primitiveX = d
   			model.x.should == v
   		end
   	end
