@@ -15,11 +15,12 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.test_files    = gem.files.grep(%r{^(test|spec|features|app|db|resources)/})
   gem.require_paths = ["lib"]
 
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'bubble-wrap'
+  gem.add_development_dependency 'motion-facon'
   gem.add_dependency 'nokogiri'
   gem.add_dependency 'activesupport'
   gem.add_dependency 'i18n'

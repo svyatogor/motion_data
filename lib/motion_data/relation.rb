@@ -5,9 +5,11 @@ module MotionData
       self
     end
 
-    def all
-      to_a
+    def to_a
+      error_ptr = Pointer.new('@')
+      context.executeFetchRequest(self, error: error_ptr)
     end
+    alias_method :all, :to_a
 
     def count
       return to_a.count if fetchOffset > 0
@@ -19,7 +21,7 @@ module MotionData
     end
 
     def destroy_all
-      all.map &:destroy
+      to_a.map &:destroy
     end
 
     def except(query_part)
@@ -98,11 +100,6 @@ module MotionData
 
     def inspect
       to_a
-    end
-
-    def to_a
-      error_ptr = Pointer.new(:object)
-      context.executeFetchRequest(self, error: error_ptr)
     end
 
     private
