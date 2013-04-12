@@ -72,11 +72,11 @@ module MotionData
     def save!
       context.insertObject(self) if new_record?
 
-      # error = Pointer.new(:object)
-      # unless context.save(error)
-      #   context.deleteObject(self)
-      #   raise Nitron::RecordNotSaved, self and return false
-      # end
+      error = Pointer.new(:object)
+      unless context.save(error)
+         context.deleteObject(self)
+         raise Nitron::RecordNotSaved, self and return false
+      end
       true
     end
 
