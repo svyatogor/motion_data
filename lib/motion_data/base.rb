@@ -32,14 +32,18 @@ module MotionData
 
           define_method name do
             willAccessValueForKey name
-            v = Marshal.load(self.send(:"primitive#{name.capitalize}").nsstring)
+            v = self.send(:"raw_#{name}").nsstring
             didAccessValueForKey name
-            v
+            begin
+              Marshal.load(v)
+            rescue
+              nil
+            end
           end
 
           define_method "#{name}=" do |v|
             willChangeValueForKey name
-            self.send(:"primitive#{name.capitalize}=", Marshal.dump(v).nsdata)
+            self.send(:"raw_#{name}=", Marshal.dump(v).nsdata)
             didChangeValueForKey name
             v
           end

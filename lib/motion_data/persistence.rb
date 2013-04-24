@@ -75,7 +75,8 @@ module MotionData
       error = Pointer.new(:object)
       unless context.save(error)
          context.deleteObject(self)
-         raise Nitron::RecordNotSaved, self and return false
+         puts error.object.error
+         raise StandardError, self and return false
       end
       true
     end

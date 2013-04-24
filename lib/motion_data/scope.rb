@@ -1,12 +1,17 @@
 module MotionData
   class Scope < NSFetchRequest
     def initWithClass(klass)
-      self.entity = klass.entity_description if init
+      @klass = klass
+      if init
+        self.entity = klass.entity_description
+      end
       self
     end
 
     def to_a
       error_ptr = Pointer.new('@')
+
+      self.entity = @klass.entity_description # FIXME: Why is this required?
       context.executeFetchRequest(self, error: error_ptr)
     end
 
@@ -15,6 +20,7 @@ module MotionData
     def count
       #return to_a.count if self.fetchOffset > 0
       error_ptr = Pointer.new('@')
+      self.entity = @klass.entity_description # FIXME: Why is this required?
       context.countForFetchRequest self, error: error_ptr
     end
 
