@@ -9,10 +9,10 @@ module MotionData
     end
 
     def to_a
-      error_ptr = Pointer.new('@')
+      error_ptr = Pointer.new(:object)
 
-      self.entity = @klass.entity_description # FIXME: Why is this required?
-      context.executeFetchRequest(self, error: error_ptr)
+      result = context.executeFetchRequest(self, error: error_ptr)
+      result
     end
 
     alias_method :all, :to_a
@@ -20,7 +20,6 @@ module MotionData
     def count
       #return to_a.count if self.fetchOffset > 0
       error_ptr = Pointer.new('@')
-      self.entity = @klass.entity_description # FIXME: Why is this required?
       context.countForFetchRequest self, error: error_ptr
     end
 
@@ -125,9 +124,12 @@ module MotionData
         new_predicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicate, new_predicate])
       end
 
-      self.clone.tap do |n|
-        n.predicate = new_predicate
+      copy = self.class.new
+      %w(entity sortDescriptors fetchLimit fetchOffset resultType).each do |k|
+        copy.send("#{k}=", self.send(k))
       end
+      copy.predicate = new_predicate
+      copy
     end
 
     private

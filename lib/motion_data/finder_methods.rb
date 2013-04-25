@@ -95,7 +95,7 @@ module MotionData
       private
 
       def relation
-        Scope.alloc.initWithClass(self)
+        @relation ||= Scope.alloc.initWithClass(self)
       end
 
     end
