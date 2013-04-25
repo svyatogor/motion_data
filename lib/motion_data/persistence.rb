@@ -53,7 +53,7 @@ module MotionData
     end
 
     def new_record?
-      @new_record || false
+      @new_record
     end
 
     def persisted?
@@ -73,12 +73,18 @@ module MotionData
       context.insertObject(self) if new_record?
 
       error = Pointer.new(:object)
-      unless context.save(error)
-         context.deleteObject(self)
-         puts error.object.error
-         raise StandardError, self and return false
+      if context.save(error)
+        @new_record = false
+      else
+        context.deleteObject(self)
+        puts error.to_object.error
+        raise StandardError, self and return false
       end
       true
+    end
+
+    def awakeFromFetch
+      @new_record  = false
     end
 
   end
