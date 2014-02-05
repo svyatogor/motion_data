@@ -24,12 +24,15 @@ module MotionData
 
       def new(attributes={}, _context = nil)
         _context ||= context
-        instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext:_context).tap do |model|
-          model.instance_variable_set('@new_record', true)
-          attributes.each do |keyPath, value|
-            model.send("#{keyPath}=", value)
+        instance = nil
+        context.performBlockAndWait(lambda do
+          instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: _context).tap do |model|
+            model.instance_variable_set('@new_record', true)
+            attributes.each do |keyPath, value|
+              model.send("#{keyPath}=", value)
+            end
           end
-        end
+        end)
         yield instance if block_given?
         instance
       end
@@ -39,9 +42,11 @@ module MotionData
     def destroy
 
       if context = managedObjectContext
-        context.deleteObject(self)
-        error = Pointer.new(:object)
-        context.save(error)
+        context.performBlockAndWait -> () {
+          context.deleteObject(self)
+          error = Pointer.new(:object)
+          context.save(error)
+        }
       end
 
       @destroyed = true
@@ -61,30 +66,38 @@ module MotionData
     end
 
     def save
-      begin
-        save!
-      rescue Nitron::RecordNotSaved
-        return false
+      error       = Pointer.new(:object)
+      save_status = false
+      context.performBlockAndWait -> () { save_status = context.save(error) }
+      if save_status
+        @new_record = false
+        true
+      else
+        NSLog("Error on saving: %@", error.value)
+        false
       end
-      true
     end
 
     def save!
-      context.insertObject(self) if new_record?
+      #if new_record?
+      #  context.performBlockAndWait -> () { context.insertObject(self) }
+      #end
 
-      error = Pointer.new(:object)
-      if context.save(error)
+      error       = Pointer.new(:object)
+      save_status = false
+      context.performBlockAndWait -> () { save_status = context.save(error) }
+      if save_status
         @new_record = false
       else
-        context.deleteObject(self)
-        puts error.to_object.error
-        raise StandardError, self and return false
+        #context.performBlockAndWait -> () { context.deleteObject(self) }
+        #puts error.to_object.error
+        raise StandardError, error.value and return false
       end
       true
     end
 
     def awakeFromFetch
-      @new_record  = false
+      @new_record = false
     end
 
   end

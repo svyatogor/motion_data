@@ -46,7 +46,7 @@ module MotionData
       _fetchOffset = self.fetchOffset
 
       self.fetchLimit = 1
-      _first          = to_a[0]
+      _first          = (to_a.count == 0 ? nil : to_a[0])
 
       self.fetchLimit  = _fetchLimit
       self.fetchOffset = _fetchOffset
@@ -60,7 +60,7 @@ module MotionData
       count = countAll
       self.fetchOffset = count - 1 unless count < 1
       self.fetchLimit = 1
-      _last           = to_a[0]
+      _last           = (to_a.count == 0 ? nil : to_a[0])
 
       self.fetchLimit  = _fetchLimit
       self.fetchOffset = _fetchOffset

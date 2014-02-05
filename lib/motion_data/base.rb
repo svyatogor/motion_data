@@ -26,16 +26,16 @@ module MotionData
         options = args.last.is_a?(::Hash) ? args.pop : {}
 
         if args.length > 1
-          args.each {|name| serialize name, options}
+          args.each { |name| serialize name, options }
         else
           name = args.first
 
           define_method name do
             willAccessValueForKey name
-            v = self.send(:"raw_#{name}").nsstring
+            v = self.send(:"raw_#{name}")
             didAccessValueForKey name
             begin
-              Marshal.load(v)
+              BW::JSON.parse(v.to_s)
             rescue
               nil
             end
@@ -43,7 +43,7 @@ module MotionData
 
           define_method "#{name}=" do |v|
             willChangeValueForKey name
-            self.send(:"raw_#{name}=", Marshal.dump(v).nsdata)
+            self.send(:"raw_#{name}=", BW::JSON.generate(v).nsdata)
             didChangeValueForKey name
             v
           end
