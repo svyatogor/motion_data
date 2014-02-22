@@ -8,11 +8,8 @@ module MotionData
     module ClassMethods
 
       def create(attributes={}, &block)
-        begin
-          model = create!(attributes, &block)
-        rescue Nitron::RecordNotSaved
-          return false
-        end
+        model = new(attributes, &block)
+        model.save
         model
       end
 
@@ -63,6 +60,10 @@ module MotionData
 
     def persisted?
       !(new_record? || destroyed?)
+    end
+
+    def flush
+      @new_record = false
     end
 
     def save
