@@ -36,18 +36,20 @@ module MotionData
 
     end
 
-    def destroy
-
+    def delete(options = {})
       if context = managedObjectContext
-        context.performBlockAndWait -> () {
-          context.deleteObject(self)
-          error = Pointer.new(:object)
-          context.save(error)
-        }
+        before_delete if respond_to?(:before_delete)
+        context.performBlockAndWait -> () { context.deleteObject(self) }
+        after_delete if respond_to?(:after_delete)
       end
 
       @destroyed = true
+      save if options[:save]
       freeze
+    end
+
+    def destroy
+      delete save: true
     end
 
     def destroyed?
@@ -86,7 +88,11 @@ module MotionData
 
       error       = Pointer.new(:object)
       save_status = false
-      context.performBlockAndWait -> () { save_status = context.save(error) }
+      context.performBlockAndWait -> () {
+        save_status = context.save(error)
+        p error.value unless save_status
+        save_status
+      }
       if save_status
         @new_record = false
       else
