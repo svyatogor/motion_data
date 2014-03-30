@@ -19,13 +19,39 @@ module MotionData
         model
       end
 
-      def new(attributes={}, _context = nil)
-        _context ||= context
+      def new(*args)
+        attributes = {}
+        context    = nil
+
+        if args.length == 1 and args[0].is_a? Symbol
+          context = args[0]
+        end
+
+        if args.length == 1 and args[0].is_a? Hash
+          attributes = args[0]
+        end
+
+        if args.length == 2
+          attributes = args[0]
+          context    = args[1]
+        end
+
+        if context.is_a? Symbol
+          context = case context
+                      when :private
+                        App.delegate.background_moc
+                      else
+                        App.delegate.moc
+                    end
+        end
+
+        context  ||= App.delegate.moc
         instance = nil
         context.performBlockAndWait(lambda do
-          instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: _context).tap do |model|
+          instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: context).tap do |model|
             model.instance_variable_set('@new_record', true)
             attributes.each do |keyPath, value|
+              value = value.in_context(context) if value.is_a?(NSManagedObject)
               model.send("#{keyPath}=", value)
             end
           end
@@ -37,11 +63,9 @@ module MotionData
     end
 
     def delete(options = {})
-      if context = managedObjectContext
-        before_delete if respond_to?(:before_delete)
-        context.performBlockAndWait -> () { context.deleteObject(self) }
-        after_delete if respond_to?(:after_delete)
-      end
+      before_delete if respond_to?(:before_delete)
+      managedObjectContext.performBlockAndWait -> () { managedObjectContext.deleteObject(self) }
+      after_delete if respond_to?(:after_delete)
 
       @destroyed = true
       save if options[:save]
@@ -64,47 +88,20 @@ module MotionData
       !(new_record? || destroyed?)
     end
 
-    def flush
-      @new_record = false
-    end
-
     def save
-      error       = Pointer.new(:object)
-      save_status = false
-      context.performBlockAndWait -> () { save_status = context.save(error) }
-      if save_status
-        @new_record = false
-        true
-      else
-        NSLog("Error on saving: %@", error.value)
-        false
-      end
+      App.delegate.save! managedObjectContext
     end
 
     def save!
-      #if new_record?
-      #  context.performBlockAndWait -> () { context.insertObject(self) }
-      #end
-
-      error       = Pointer.new(:object)
-      save_status = false
-      context.performBlockAndWait -> () {
-        save_status = context.save(error)
-        p error.value unless save_status
-        save_status
-      }
-      if save_status
-        @new_record = false
-      else
-        #context.performBlockAndWait -> () { context.deleteObject(self) }
-        #puts error.to_object.error
-        raise StandardError, error.value and return false
-      end
-      true
+      App.delegate.save! managedObjectContext
     end
 
     def awakeFromFetch
       @new_record = false
+    end
+
+    def didSave
+      @new_record = false unless @destroyed
     end
 
   end

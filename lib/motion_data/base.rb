@@ -14,14 +14,35 @@ module MotionData
     end
 
     def context
-      @context ||= self.class.context
+      managedObjectContext
+    end
+
+    def in_context(_context)
+      if _context.is_a? Symbol
+        _context = case _context
+                     when :private
+                       App.delegate.background_moc
+                     else
+                       App.delegate.moc
+                   end
+      end
+
+      if _context != managedObjectContext
+        if new_record?
+          raise "You cannot change context on new record."
+        else
+          _context.objectWithID objectID
+        end
+      else
+        self
+      end
+    end
+
+    def _id
+      objectID.URIRepresentation.absoluteString
     end
 
     class << self
-      def context
-        @context ||= UIApplication.sharedApplication.delegate.managedObjectContext
-      end
-
       def serialize(*args)
         options = args.last.is_a?(::Hash) ? args.pop : {}
 
@@ -52,7 +73,7 @@ module MotionData
       end
 
       def entity_description
-        @_metadata ||= UIApplication.sharedApplication.delegate.managedObjectModel.entitiesByName[name]
+        @_metadata ||= App.delegate.managedObjectModel.entitiesByName[name]
       end
     end
   end

@@ -1,5 +1,7 @@
 module MotionData
   class Scope < NSFetchRequest
+    attr_accessor :context
+
     def initWithClass(klass)
       @klass = klass
       if init
@@ -10,8 +12,10 @@ module MotionData
 
     def to_a
       error_ptr = Pointer.new(:object)
-
-      result = context.executeFetchRequest(self, error: error_ptr)
+      result    = nil
+      context.performBlockAndWait -> {
+        result = context.executeFetchRequest(self, error: error_ptr)
+      }
       result
     end
 
@@ -20,7 +24,11 @@ module MotionData
     def count
       #return to_a.count if self.fetchOffset > 0
       error_ptr = Pointer.new('@')
-      context.countForFetchRequest self, error: error_ptr
+      count     = 0
+      context.performBlockAndWait -> {
+        count = context.countForFetchRequest self, error: error_ptr
+      }
+      count
     end
 
     def destroy_all
@@ -57,10 +65,10 @@ module MotionData
       _fetchLimit  = self.fetchLimit
       _fetchOffset = self.fetchOffset
 
-      count = countAll
+      count            = countAll
       self.fetchOffset = count - 1 unless count < 1
-      self.fetchLimit = 1
-      _last           = (to_a.count == 0 ? nil : to_a[0])
+      self.fetchLimit  = 1
+      _last            = (to_a.count == 0 ? nil : to_a[0])
 
       self.fetchLimit  = _fetchLimit
       self.fetchOffset = _fetchOffset
@@ -107,6 +115,7 @@ module MotionData
       case criteria
         when Hash
           new_predicate = NSCompoundPredicate.andPredicateWithSubpredicates(criteria.map do |keyPath, value|
+            value = value.in_context(context) if value.is_a?(NSManagedObject)
             Predicate::Builder.new(keyPath) == value
           end)
         #when Scope
@@ -115,6 +124,7 @@ module MotionData
         when NSPredicate
           new_predicate = criteria
         when String
+          args          = args.map { |value| value.is_a?(NSManagedObject) ? value.in_context(context) : value }
           new_predicate = NSPredicate.predicateWithFormat(criteria.gsub("?", "%@"), argumentArray: args)
         else
           raise ArgumentError, "unsupported where conditions class `#{criteria.class}'"
@@ -125,17 +135,30 @@ module MotionData
       end
 
       copy = self.class.new
-      %w(entity sortDescriptors fetchLimit fetchOffset resultType).each do |k|
+      %w(entity sortDescriptors fetchLimit fetchOffset resultType context).each do |k|
         copy.send("#{k}=", self.send(k))
       end
       copy.predicate = new_predicate
       copy
     end
 
+    def in_context(context)
+      if context.is_a? Symbol
+        context = case context
+                    when :private
+                      App.delegate.background_moc
+                    else
+                      App.delegate.moc
+                  end
+      end
+      @context = context
+      self
+    end
+
     private
 
     def context
-      UIApplication.sharedApplication.delegate.managedObjectContext
+      @context ||= App.delegate.moc
     end
 
     def countAll

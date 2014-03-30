@@ -92,6 +92,10 @@ module MotionData
         relation.where(*args)
       end
 
+      def in_context(context)
+        relation.in_context context
+      end
+
       private
 
       def relation
