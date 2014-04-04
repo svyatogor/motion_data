@@ -64,7 +64,7 @@ module MotionData
 
           define_method "#{name}=" do |v|
             willChangeValueForKey name
-            self.send(:"raw_#{name}=", BW::JSON.generate(v).nsdata)
+            self.send(:"raw_#{name}=", BW::JSON.generate(v))
             didChangeValueForKey name
             v
           end
