@@ -31,7 +31,9 @@ module MotionData
         if new_record?
           raise "You cannot change context on new record."
         else
-          _context.objectWithID objectID
+          obj_in_context = nil
+          _context.performBlockAndWait -> { obj_in_context = _context.objectWithID objectID }
+          obj_in_context
         end
       else
         self
