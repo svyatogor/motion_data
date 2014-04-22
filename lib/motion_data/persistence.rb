@@ -5,7 +5,16 @@ module MotionData
       base.extend(ClassMethods)
     end
 
+    def ensure_correct_queue
+      NSLog "Do NOT access private MOC on main queue" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
+      NSLog "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
+    end
+
     module ClassMethods
+      def ensure_correct_queue(context)
+        NSLog "Do NOT access private MOC on main queue" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
+        NSLog "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
+      end
 
       def create(attributes={}, &block)
         model = new(attributes, &block)
@@ -47,6 +56,7 @@ module MotionData
 
         context  ||= App.delegate.moc
         instance = nil
+        ensure_correct_queue(context)
         context.performBlockAndWait(lambda do
           instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: context).tap do |model|
             model.instance_variable_set('@new_record', true)
@@ -64,6 +74,7 @@ module MotionData
 
     def delete(options = {})
       before_delete if respond_to?(:before_delete)
+      ensure_correct_queue
       managedObjectContext.performBlockAndWait -> () { managedObjectContext.deleteObject(self) }
       after_delete if respond_to?(:after_delete)
 
@@ -89,10 +100,12 @@ module MotionData
     end
 
     def save
+      #ensure_correct_queue rescue p caller
       App.delegate.save! managedObjectContext
     end
 
     def save!
+      #ensure_correct_queue rescue p caller
       App.delegate.save! managedObjectContext
     end
 
