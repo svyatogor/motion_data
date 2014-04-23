@@ -11,16 +11,16 @@ module MotionData
     end
 
     def ensure_correct_queue
-      NSLog "Do NOT access private MOC (#{context.concurrencyType}) on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
-      NSLog "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
+      raise "Do NOT access private MOC (#{context.concurrencyType}) on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
+      raise "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
     end
 
     def to_a
-      error_ptr = Pointer.new(:object)
-      result    = nil
+      result = nil
       ensure_correct_queue
       context.performBlockAndWait -> {
-        result = context.executeFetchRequest(self, error: error_ptr)
+        error_ptr = Pointer.new(:object)
+        result    = context.executeFetchRequest(self, error: error_ptr)
       }
       result
     end

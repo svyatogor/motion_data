@@ -33,8 +33,8 @@ module MotionData
         else
           obj_in_context = nil
 
-          NSLog "Do NOT access private MOC (#{_context.concurrencyType}) on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && _context.concurrencyType == NSPrivateQueueConcurrencyType)
-          NSLog "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && _context.concurrencyType == NSMainQueueConcurrencyType)
+          raise "Do NOT access private MOC (#{_context.concurrencyType}) on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && _context.concurrencyType == NSPrivateQueueConcurrencyType)
+          raise "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && _context.concurrencyType == NSMainQueueConcurrencyType)
           _context.performBlockAndWait -> { obj_in_context = _context.objectWithID objectID }
           obj_in_context
         end
