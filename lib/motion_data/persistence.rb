@@ -16,14 +16,14 @@ module MotionData
         NSLog "Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
       end
 
-      def create(attributes={}, &block)
-        model = new(attributes, &block)
+      def create(*args)
+        model = new(*args)
         model.save
         model
       end
 
-      def create!(attributes={}, &block)
-        model = new(attributes, &block)
+      def create!(*args)
+        model = new(*args)
         model.save!
         model
       end
