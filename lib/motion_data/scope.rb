@@ -131,7 +131,7 @@ module MotionData
         when NSPredicate
           new_predicate = criteria
         when String
-          args          = args.map { |value| value.is_a?(NSManagedObject) ? value.in_context(context) : value }
+          #args          = args.map { |value| value.is_a?(NSManagedObject) ? value.in_context(context) : value }
           new_predicate = NSPredicate.predicateWithFormat(criteria.gsub("?", "%@"), argumentArray: args)
         else
           raise ArgumentError, "unsupported where conditions class `#{criteria.class}'"

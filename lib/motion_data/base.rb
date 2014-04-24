@@ -13,8 +13,19 @@ module MotionData
       "#<#{entity.name} #{properties.join(", ")}>"
     end
 
+    def schedule(*args, &block)
+      App.delegate.background_moc.performBlock -> {
+        obj = App.delegate.background_moc.objectWithID(objectID)
+        args.unshift obj
+        block.call *args
+      }
+    end
+
     def context
       managedObjectContext
+    end
+
+    def assert_background
     end
 
     def in_context(_context)

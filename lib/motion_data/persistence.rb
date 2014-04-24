@@ -100,13 +100,16 @@ module MotionData
     end
 
     def save
-      #ensure_correct_queue rescue p caller
-      App.delegate.save! managedObjectContext
+      error       = Pointer.new(:object)
+      save_status = context.save(error)
+      unless save_status
+        log("Error on saving: #{error.value.description}") if error.value
+      end
+      save_status
     end
 
     def save!
-      #ensure_correct_queue rescue p caller
-      App.delegate.save! managedObjectContext
+      save
     end
 
     def awakeFromFetch
@@ -114,6 +117,7 @@ module MotionData
     end
 
     def didSave
+      NSLog "didSave #{self.class.name}"
       @new_record = false unless @destroyed
     end
 
