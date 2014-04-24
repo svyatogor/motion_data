@@ -14,11 +14,15 @@ module MotionData
     end
 
     def schedule(*args, &block)
-      App.delegate.background_moc.performBlock -> {
-        obj = App.delegate.background_moc.objectWithID(objectID)
-        args.unshift obj
-        block.call *args
-      }
+      if block
+        App.delegate.background_moc.performBlock -> {
+          obj = App.delegate.background_moc.objectWithID(objectID)
+          args.unshift obj
+          block.call *args
+        }
+      else
+        @scheduler = Scheduler.new(self)
+      end
     end
 
     def context
@@ -92,6 +96,20 @@ module MotionData
       def entity_description
         @_metadata ||= App.delegate.managedObjectModel.entitiesByName[name]
       end
+    end
+  end
+
+
+  class Scheduler
+    def initialize(object)
+      @object = WeakRef.new(object)
+    end
+
+    def method_missing(method, *args)
+      App.delegate.background_moc.performBlock -> {
+        obj = App.delegate.background_moc.objectWithID(@object.objectID)
+        obj.send(method, *args)
+      }
     end
   end
 end

@@ -117,7 +117,6 @@ module MotionData
     end
 
     def didSave
-      NSLog "didSave #{self.class.name}"
       @new_record = false unless @destroyed
     end
 
