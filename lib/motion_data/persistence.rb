@@ -113,7 +113,7 @@ module MotionData
     end
 
     def awakeFromFetch
-      @new_record = false
+      @new_record = false unless @destroyed
     end
 
     def didSave

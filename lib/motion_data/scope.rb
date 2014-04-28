@@ -16,12 +16,9 @@ module MotionData
     end
 
     def to_a
-      result = nil
       ensure_correct_queue
-      context.performBlockAndWait -> {
-        error_ptr = Pointer.new(:object)
-        result    = context.executeFetchRequest(self, error: error_ptr)
-      }
+      error_ptr = Pointer.new(:object)
+      result    = context.executeFetchRequest(self, error: error_ptr)
       result
     end
 
@@ -30,11 +27,8 @@ module MotionData
     def count
       #return to_a.count if self.fetchOffset > 0
       error_ptr = Pointer.new('@')
-      count     = 0
       ensure_correct_queue
-      context.performBlockAndWait -> {
-        count = context.countForFetchRequest self, error: error_ptr
-      }
+      count = context.countForFetchRequest self, error: error_ptr
       count
     end
 

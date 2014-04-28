@@ -19,6 +19,7 @@ module MotionData
           obj = App.delegate.background_moc.objectWithID(objectID)
           args.unshift obj
           block.call *args
+          save
         }
       else
         @scheduler = Scheduler.new(self)
@@ -109,6 +110,7 @@ module MotionData
       App.delegate.background_moc.performBlock -> {
         obj = App.delegate.background_moc.objectWithID(@object.objectID)
         obj.send(method, *args)
+        save
       }
     end
   end
