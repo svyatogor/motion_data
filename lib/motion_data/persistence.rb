@@ -55,17 +55,15 @@ module MotionData
         end
 
         context  ||= App.delegate.moc
-        instance = nil
         ensure_correct_queue(context)
-        context.performBlockAndWait(lambda do
-          instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: context).tap do |model|
-            model.instance_variable_set('@new_record', true)
-            attributes.each do |keyPath, value|
-              value = value.in_context(context) if value.is_a?(NSManagedObject)
-              model.send("#{keyPath}=", value)
-            end
+
+        instance = alloc.initWithEntity(entity_description, insertIntoManagedObjectContext: context).tap do |model|
+          model.instance_variable_set('@new_record', true)
+          attributes.each do |keyPath, value|
+            value = value.in_context(context) if value.is_a?(NSManagedObject)
+            model.send("#{keyPath}=", value)
           end
-        end)
+        end
         yield instance if block_given?
         instance
       end
