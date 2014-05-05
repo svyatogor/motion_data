@@ -73,7 +73,7 @@ module MotionData
     def delete(options = {})
       before_delete if respond_to?(:before_delete)
       ensure_correct_queue
-      managedObjectContext.performBlockAndWait -> () { managedObjectContext.deleteObject(self) }
+      managedObjectContext.deleteObject(self)
       after_delete if respond_to?(:after_delete)
 
       @destroyed = true

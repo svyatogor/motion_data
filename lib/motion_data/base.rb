@@ -19,7 +19,11 @@ module MotionData
           obj = App.delegate.background_moc.objectWithID(objectID)
           args.unshift obj
           block.call *args
-          obj.save
+
+          error = Pointer.new(:object)
+          unless App.delegate.background_moc.save(error)
+            log("Error on saving: #{error.value.description}") if error.value
+          end
         }
       else
         @scheduler = Scheduler.new(self)
@@ -110,7 +114,7 @@ module MotionData
       App.delegate.background_moc.performBlock -> {
         obj = App.delegate.background_moc.objectWithID(@object.objectID)
         obj.send(method, *args)
-        save
+        obj.save
       }
     end
   end
