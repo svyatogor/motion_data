@@ -77,7 +77,7 @@ module MotionData
       after_delete if respond_to?(:after_delete)
 
       @destroyed = true
-      save if options[:save]
+      options[:save] ? save : managedObjectContext.processPendingChanges
       freeze
     end
 
