@@ -71,6 +71,10 @@ module MotionData
     end
 
     def delete(options = {})
+      e = Pointer.new(:object)
+      unless validateForDelete(e)
+        NSLog "Object of type #{self.class.name} cannot be deleted at this time: #{e.value}"
+      end
       before_delete if respond_to?(:before_delete)
       ensure_correct_queue
       managedObjectContext.deleteObject(self)
