@@ -1,8 +1,20 @@
 module MotionData
+  OBJ_CACHE      = {}
+  CACHED_KLASSES = []
   class Base < NSManagedObject
     include MotionData::FinderMethods
     include MotionData::Persistence
     include MotionData::Validations
+
+    class << self
+      def enable_caching
+        CACHED_KLASSES << self.name
+      end
+
+      def core_cacheable?
+        @cacheable ||= self.class.ancestors.map(&:name).any? { |k| CACHED_KLASSES.include? k }
+      end
+    end
 
     def inspect
       properties = []
@@ -13,10 +25,23 @@ module MotionData
       "#<#{entity.name} #{properties.join(", ")}>"
     end
 
+    def core_cache
+      return self unless self.class.core_cacheable?
+      if OBJ_CACHE[objectID]
+        OBJ_CACHE[objectID]
+      else
+        OBJ_CACHE[objectID] = self
+      end
+    end
+
     def schedule(*args, &block)
       if block
         App.delegate.background_moc.performBlock -> {
-          obj = App.delegate.background_moc.objectWithID(objectID)
+          obj = if self.class.core_cacheable?
+                  OBJ_CACHE[objectID] ||= App.delegate.background_moc.objectWithID(objectID)
+                else
+                  App.delegate.background_moc.objectWithID(objectID)
+                end
           args.unshift obj
           block.call *args
 
