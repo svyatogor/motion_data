@@ -11,8 +11,8 @@ module MotionData
     end
 
     def ensure_correct_queue
-      raise "[#{self.entity.name}] Do NOT access private MOC on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
-      raise "[#{self.entity.name}] Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
+      # raise "[#{self.entity.name}] Do NOT access private MOC on #{Dispatch::Queue.current}" if (Dispatch::Queue.main.to_s == Dispatch::Queue.current.to_s && context.concurrencyType == NSPrivateQueueConcurrencyType)
+      # raise "[#{self.entity.name}] Do NOT access main MOC on private queue" if (Dispatch::Queue.main.to_s != Dispatch::Queue.current.to_s && context.concurrencyType == NSMainQueueConcurrencyType)
     end
 
     def to_a
