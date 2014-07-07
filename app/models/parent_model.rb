@@ -1,2 +1,2 @@
-class ParentModel < MotionData::Base
+class ParentModel < CDQManagedObject
 end

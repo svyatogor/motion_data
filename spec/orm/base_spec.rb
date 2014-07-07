@@ -1,4 +1,4 @@
-describe "MotionData::Base" do
+describe "CDQManagedObject" do
 	before do
 	end
 
